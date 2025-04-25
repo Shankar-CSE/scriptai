@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protected Gateway</title>
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes scaleIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-500px) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(15px); }
+            75% { transform: translateX(-15px); }
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            font-family: 'Arial Rounded MT Bold', sans-serif;
+            overflow: hidden;
+        }
+
+        .magic-box {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2.5rem 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            text-align: center;
+            animation: float 3s ease-in-out infinite;
+            transition: all 0.3s ease;
+            z-index: 10;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        h2 {
+            color: #2d3436;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ffeaa7;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fff9e6;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 15px rgba(78, 205, 196, 0.3);
+            transform: scale(1.02);
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #4ecdc4, #45b7af);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0,0,0,0.15);
+        }
+
+        .success-popup {
+            display: none;
+            animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+        }
+
+        .history-btn {
+            background: linear-gradient(45deg, #4285f4, #357abd);
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .history-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            animation: confetti 2s ease-out;
+            z-index: 1;
+        }
+
+        .info-text {
+            margin: 10px 0;
+            font-size: 0.9rem;
+            color: #2d3436;
+        }
+
+        .insta-link {
+            color: #e1306c;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .loading {
+            display: none;
+            margin-left: 10px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="magic-box" id="passwordContainer">
+       
+       <h2>login</h2>
+        
+        <form id="authForm">
+            <input type="text" class="input-field" id="userName" placeholder="Your Beautiful Name" required>
+            <input type="password" class="input-field" id="passwordInput" placeholder="Password ✨" required>
+            <button type="button" class="submit-btn" onclick="checkPassword()">
+                <span id="btnText">Unlock APP</span>
+                <span class="loading">⏳</span>
+            </button>
+        </form>
+    </div>
+
+    <div class="magic-box success-popup" id="popup">
+        <h2>🎉 Access Granted! 🎊</h2>
+        <p id="welcomeMessage"></p>
+        <a href="{% url 'index' %}" class="history-btn">
+            Open app 🧑‍💻
+        </a>
+    </div>
+
+    <script>
+        async function sendToTelegram(userName) {
+            // Replace with your actual Telegram bot token and chat ID
+            const x123 = '7916084099:AAGveQgwziArz6q7GuAT8i5mavPCfiSdkS4';
+            const x234 = '5497786551';
+            
+            const message = `🔓 New access granted!\n\nName: ${userName}\n\nTime: ${new Date().toLocaleString()}`;
+            
+            try {
+                await fetch(`https://api.telegram.org/bot${x123}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: x234,
+                        text: message
+                    })
+                });
+            } catch (error) {
+                console.error('Error sending to Telegram:', error);
+            }
+        }
+
+        function createConfetti() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#7bed9f', '#70a1ff'];
+            
+            for(let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = Math.random() * 100 + 'vh';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = Math.random() * 10 + 5 + 'px';
+                confetti.style.height = confetti.style.width;
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                document.body.appendChild(confetti);
+                
+                setTimeout(() => {
+                    confetti.remove();
+                }, 2000);
+            }
+        }
+
+        async function checkPassword() {
+            const password = document.getElementById('passwordInput').value;
+            const userName = document.getElementById('userName').value;
+            const container = document.getElementById('passwordContainer');
+            const btnText = document.getElementById('btnText');
+            const loading = document.querySelector('.loading');
+            
+            if (!userName) {
+                alert('Please enter your name');
+                return;
+            }
+            
+            if (password === 'FF05') {
+                btnText.textContent = 'Granting Access...';
+                loading.style.display = 'inline-block';
+                
+                // Send data to Telegram
+                await sendToTelegram(userName);
+                
+                // Confetti effect
+                createConfetti();
+                
+                // Show welcome message
+                document.getElementById('welcomeMessage').textContent = `Welcome, ${userName}!`;
+                
+                container.style.display = 'none';
+                document.getElementById('popup').style.display = 'block';
+                
+                // Reset button
+                btnText.textContent = 'Unlock History';
+                loading.style.display = 'none';
+            } else {
+                container.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    container.style.animation = 'float 3s ease-in-out infinite';
+                }, 500);
+            }
+        }
+    </script>
+</body>
+</html>
